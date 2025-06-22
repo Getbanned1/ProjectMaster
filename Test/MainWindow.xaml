@@ -1,0 +1,119 @@
+﻿<Window x:Class="ProjectMaster.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ProjectFlow Manager" Height="600" Width="900">
+
+    <Window.Resources>
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="#3498DB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="15,5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="4" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Верхнее меню -->
+        <Menu Grid.Row="0" Background="#2C3E50" Foreground="White">
+            <MenuItem Header="Файл">
+                <MenuItem Header="Новый проект" Command="{Binding NewProjectCommand}"/>
+                <MenuItem Header="Экспорт отчета" Command="{Binding ExportReportCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Проект">
+                <MenuItem Header="Добавить задачу" Command="{Binding AddTaskCommand}"/>
+                <MenuItem Header="Назначить ресурсы" Command="{Binding AssignResourceCommand}"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Основная область -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Боковая панель -->
+            <Border Grid.Column="0" Background="#34495E" Padding="10">
+                <ScrollViewer x:Name="LeftScrollViewer" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Таблицы" Foreground="White" FontSize="16" Margin="0,0,0,10"/>
+                        <ListView ItemsSource="{Binding Tables}" 
+                                  SelectedItem="{Binding SelectedTable}"
+                                  Background="Transparent" Foreground="White">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding TableName}" Margin="0,0,10,0"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Рабочая область -->
+            <Border Grid.Column="1" Background="#ECF0F1" Padding="20">
+                <ScrollViewer x:Name="RightScrollViewer">
+                    <StackPanel>
+                        <TextBlock Text="{Binding SelectedTable.TableName, FallbackValue='Выберите таблицу'}" 
+                                   FontSize="20" Margin="0,0,0,20"/>
+
+                        <!-- DataGrid для отображения данных -->
+                        <DataGrid ItemsSource="{Binding TableData}" 
+                                  SelectedItem="{Binding SelectedRow}"
+                                  AutoGenerateColumns="True"
+                                  IsReadOnly="False" 
+                                  Margin="0,10,0,0"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  Background="White"
+                                  RowHeaderWidth="0">
+                        </DataGrid>
+
+                        <!-- Элементы управления CRUD -->
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Content="Добавить" 
+                                    Style="{StaticResource ModernButton}" 
+                                    Command="{Binding AddRecordCommand}"
+                                    Width="100"/>
+                            <Button Content="Сохранить" 
+                                    Style="{StaticResource ModernButton}" 
+                                    Command="{Binding SaveRecordCommand}"
+                                    Width="100"/>
+                            <Button Content="Удалить" 
+                                    Style="{StaticResource ModernButton}" 
+                                    Command="{Binding DeleteRecordCommand}"
+                                    Width="100"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- Статусная строка -->
+        <Border Grid.Row="2" Background="#2C3E50" Height="30">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,20,0">
+                <TextBlock Text="Подключено к БД" Foreground="White" Margin="0,0,20,0"/>
+                <TextBlock Text="{Binding ConnectionStatus}" Foreground="White"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
