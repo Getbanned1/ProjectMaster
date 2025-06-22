@@ -36,9 +36,9 @@
                 <MenuItem Header="Новый проект" Command="{Binding NewProjectCommand}"/>
                 <MenuItem Header="Экспорт отчета" Command="{Binding ExportReportCommand}"/>
             </MenuItem>
-            <MenuItem Header="Проект">
-                <MenuItem Header="Добавить задачу" Command="{Binding AddTaskCommand}"/>
-                <MenuItem Header="Назначить ресурсы" Command="{Binding AssignResourceCommand}"/>
+            <MenuItem Header="Файл">
+                <MenuItem Header="Экспорт в JSON" Command="{Binding ExportJsonCommand}"/>
+                <MenuItem Header="Импорт из JSON" Command="{Binding ImportJsonCommand}"/>
             </MenuItem>
         </Menu>
 

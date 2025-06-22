@@ -7,6 +7,10 @@ using System;
 using System.Windows.Input;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Win32;
+using System.Text.Json.Serialization;
+using System.Xml;
+using Newtonsoft.Json;
 
 namespace ProjectMaster
 {
@@ -127,6 +131,8 @@ namespace ProjectMaster
         public ICommand AddRecordCommand { get; }
         public ICommand SaveRecordCommand { get; }
         public ICommand DeleteRecordCommand { get; }
+        public ICommand ExportJsonCommand { get; }
+        public ICommand ImportJsonCommand { get; }
 
         public MainViewModel()
         {
@@ -134,6 +140,8 @@ namespace ProjectMaster
             AddRecordCommand = new RelayCommand(AddRecord);
             SaveRecordCommand = new RelayCommand(SaveRecord);
             DeleteRecordCommand = new RelayCommand(DeleteRecord);
+            ExportJsonCommand = new RelayCommand(ExportJson);
+            ImportJsonCommand = new RelayCommand(ImportJson);
 
             LoadTables();
         }
@@ -339,6 +347,114 @@ namespace ProjectMaster
             {
                 ConnectionStatus = $"Ошибка удаления: {ex.Message}";
             }
+        }
+
+        private void ExportJson(object obj)
+        {
+            if (SelectedTable == null || TableData == null)
+            {
+                ConnectionStatus = "Ошибка: Таблица не выбрана";
+                return;
+            }
+
+            try
+            {
+                // 1. Создаем диалог сохранения файла
+                var saveDialog = new SaveFileDialog();
+                saveDialog.Filter = "JSON files (*.json)|*.json";
+                saveDialog.FileName = $"{SelectedTable.TableName}.json";
+
+                if (saveDialog.ShowDialog() == true)
+                {
+                    // 2. Преобразуем DataTable в JSON
+                    string json = JsonConvert.SerializeObject(TableData,
+                        Newtonsoft.Json.Formatting.Indented);
+
+                    // 3. Сохраняем в файл
+                    System.IO.File.WriteAllText(saveDialog.FileName, json);
+
+                    ConnectionStatus = "Таблица экспортирована в JSON";
+                }
+            }
+            catch (Exception ex)
+            {
+                ConnectionStatus = $"Ошибка экспорта: {ex.Message}";
+            }
+        }
+
+        private void ImportJson(object obj)
+        {
+            if (SelectedTable == null)
+            {
+                ConnectionStatus = "Ошибка: Таблица не выбрана";
+                return;
+            }
+
+            try
+            {
+                var openDialog = new OpenFileDialog();
+                openDialog.Filter = "JSON files (*.json)|*.json";
+
+                if (openDialog.ShowDialog() == true)
+                {
+                    string json = System.IO.File.ReadAllText(openDialog.FileName);
+
+                    // 1. Создаем DataTable с правильной структурой
+                    var importedData = new DataTable(SelectedTable.TableName);
+
+                    // 2. Копируем структуру из текущей таблицы
+                    foreach (DataColumn col in TableData.Columns)
+                    {
+                        importedData.Columns.Add(col.ColumnName, col.DataType);
+                    }
+
+                    // 3. Заполняем данными из JSON
+                    var rows = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(json);
+                    foreach (var row in rows)
+                    {
+                        var newRow = importedData.NewRow();
+                        foreach (var item in row)
+                        {
+                            if (importedData.Columns.Contains(item.Key))
+                            {
+                                newRow[item.Key] = item.Value ?? DBNull.Value;
+                            }
+                        }
+                        importedData.Rows.Add(newRow);
+                    }
+
+                    // 4. Обновляем данные
+                    TableData.Clear();
+                    foreach (DataRow row in importedData.Rows)
+                    {
+                        var newRow = TableData.NewRow();
+                        newRow.ItemArray = row.ItemArray;
+                        TableData.Rows.Add(newRow);
+                    }
+                    TableData.AcceptChanges();
+
+                    ConnectionStatus = "Данные импортированы";
+                }
+            }
+            catch (Exception ex)
+            {
+                ConnectionStatus = $"Ошибка импорта: {ex.Message}";
+            }
+        }
+
+        private bool CheckTableStructure(DataTable importedTable)
+        {
+            // Игнорируем имя таблицы, проверяем только столбцы
+            if (importedTable.Columns.Count != TableData.Columns.Count)
+                return false;
+
+            foreach (DataColumn col in TableData.Columns)
+            {
+                if (!importedTable.Columns.Contains(col.ColumnName))
+                    return false;
+            }
+
+            return true;
         }
 
     }
