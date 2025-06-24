@@ -22,7 +22,7 @@ namespace ProjectMaster
         private Table _selectedTable;
         private DataTable _tableData;
         private string _connectionStatus = "Не подключено";
-        string connStr = "Host=localhost;Port=5432;Database=ProjectMaster;Username=postgres;Password=1472";
+        string connStr = "Host=localhost;Port=5432;Database=case2;Username=postgres;Password=sa";
         public ObservableCollection<Table> Tables
         {
             get => _tables;
@@ -149,8 +149,6 @@ namespace ProjectMaster
         private void AddRecord(object obj)
         {
             if (SelectedTable == null) return;
-
-            string connStr = "Host=localhost;Port=5432;Database=ProjectMaster;Username=postgres;Password=1472";
 
             using (var conn = new NpgsqlConnection(connStr))
             {
@@ -300,7 +298,6 @@ namespace ProjectMaster
         {
             if (SelectedTable == null || TableData == null) return;
 
-            string connStr = "Host=localhost;Port=5432;Database=ProjectMaster;Username=postgres;Password=1472";
 
             using (var conn = new NpgsqlConnection(connStr))
             {
@@ -433,12 +430,24 @@ namespace ProjectMaster
                     }
                     TableData.AcceptChanges();
 
-                    ConnectionStatus = "Данные импортированы";
+                    // Добавляем сохранение в БД с использованием Npgsql v5
+                    using (var connection = new NpgsqlConnection(connStr))
+                    {
+                        connection.Open();
+                        using (var adapter = new NpgsqlDataAdapter($"SELECT * FROM {SelectedTable.TableName}", connection))
+                        {
+                            var builder = new NpgsqlCommandBuilder(adapter);
+                            adapter.UpdateBatchSize = 1000;
+                            adapter.Update(TableData);
+                        }
+                    }
+
+                    ConnectionStatus = "Данные импортированы и обновлены в БД";
                 }
             }
             catch (Exception ex)
             {
-                ConnectionStatus = $"Ошибка импорта: {ex.Message}";
+                ConnectionStatus = $"Ошибка: {ex.Message}";
             }
         }
 

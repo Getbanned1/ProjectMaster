@@ -31,7 +31,7 @@
         </Grid.RowDefinitions>
 
         <!-- Верхнее меню -->
-        <Menu Grid.Row="0" Background="#2C3E50" Foreground="White">
+        <Menu Grid.Row="0" Background="#2C3E50" Foreground="Black">
             <MenuItem Header="Файл">
                 <MenuItem Header="Новый проект" Command="{Binding NewProjectCommand}"/>
                 <MenuItem Header="Экспорт отчета" Command="{Binding ExportReportCommand}"/>
