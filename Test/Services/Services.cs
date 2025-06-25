@@ -20,7 +20,7 @@ namespace ProjectMaster
         public event PropertyChangedEventHandler PropertyChanged;
 
         private string _connectionStatus = "Не подключено";
-        private string _connectionString = "Host=localhost;Port=5432;Database=ProjectMaster;Username=postgres;Password=1472";
+        private string _connectionString = "Host=localhost;Port=5432;Database=ProjectMaster;Username=postgres;Password=sa";
 
         public string ConnectionString
         {

@@ -1,7 +1,7 @@
 ﻿<Window x:Class="ProjectMaster.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="ProjectFlow Manager" Height="600" Width="900">
+        Title="ProjectMaster" Height="600" Width="900">
 
     <Window.Resources>
         <Style x:Key="ModernButton" TargetType="Button">
@@ -31,7 +31,7 @@
         </Grid.RowDefinitions>
 
         <!-- Верхнее меню -->
-        <Menu Grid.Row="0" Background="#2C3E50" Foreground="Black">
+        <Menu Grid.Row="0" Background="White" Foreground="Black">
             <MenuItem Header="Файл">
                 <MenuItem Header="Экспорт в JSON" Command="{Binding ExportJsonCommand}"/>
                 <MenuItem Header="Импорт из JSON" Command="{Binding ImportJsonCommand}"/>
