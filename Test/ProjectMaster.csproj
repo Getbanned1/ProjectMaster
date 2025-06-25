@@ -92,6 +92,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\ColumnInfo.cs" />
+    <Compile Include="Models\RelayCommand.cs" />
+    <Compile Include="Services\Services.cs" />
+    <Compile Include="Models\Table.cs" />
+    <Compile Include="Services\IDatabaseService.cs" />
+    <Compile Include="Services\IExportService.cs" />
+    <Compile Include="Services\IRecordService.cs" />
+    <Compile Include="Services\ITableService.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
