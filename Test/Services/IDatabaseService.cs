@@ -16,6 +16,6 @@ namespace ProjectMaster
         ObservableCollection<Table> GetTables();
         DataTable GetTableData(string tableName);
         bool ExecuteNonQuery(string sql, Dictionary<string, object> parameters = null);
-        NpgsqlDataAdapter GetDataAdapter(string tableName);
+        NpgsqlDataAdapter GetDataAdapter(string tableName, NpgsqlConnection conn);
     }
 }

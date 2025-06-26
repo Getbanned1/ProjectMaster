@@ -33,10 +33,6 @@
         <!-- Верхнее меню -->
         <Menu Grid.Row="0" Background="#2C3E50" Foreground="Black">
             <MenuItem Header="Файл">
-                <MenuItem Header="Новый проект" Command="{Binding NewProjectCommand}"/>
-                <MenuItem Header="Экспорт отчета" Command="{Binding ExportReportCommand}"/>
-            </MenuItem>
-            <MenuItem Header="Файл">
                 <MenuItem Header="Экспорт в JSON" Command="{Binding ExportJsonCommand}"/>
                 <MenuItem Header="Импорт из JSON" Command="{Binding ImportJsonCommand}"/>
             </MenuItem>

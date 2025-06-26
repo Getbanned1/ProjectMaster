@@ -113,13 +113,9 @@ namespace ProjectMaster
             }
         }
 
-        public NpgsqlDataAdapter GetDataAdapter(string tableName)
+        public NpgsqlDataAdapter GetDataAdapter(string tableName, NpgsqlConnection connection)
         {
-            using (var conn = new NpgsqlConnection(_connectionString))
-            {
-                conn.Open();
-                return new NpgsqlDataAdapter($"SELECT * FROM {tableName}", conn);
-            }
+            return new NpgsqlDataAdapter($"SELECT * FROM {tableName}", connection);
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -205,10 +201,14 @@ namespace ProjectMaster
 
         public void SaveRecord(string tableName, DataTable data)
         {
-            var da = _databaseService.GetDataAdapter(tableName);
-            var cb = new NpgsqlCommandBuilder(da);
-            da.Update(data);
-            data.AcceptChanges();
+            using (var conn = new NpgsqlConnection(_databaseService.ConnectionString))
+            {
+                conn.Open();
+                var da = _databaseService.GetDataAdapter(tableName, conn);
+                var cb = new NpgsqlCommandBuilder(da);
+                da.Update(data);
+                data.AcceptChanges();
+            } // Соединение автоматически закрывается здесь
         }
 
         public void DeleteRecord(string tableName, DataRowView selectedRow)
@@ -379,15 +379,58 @@ namespace ProjectMaster
                     var rows = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(json);
                     foreach (var row in rows)
                     {
-                        var newRow = data.NewRow();
-                        foreach (var item in row)
+                        // Проверяем, есть ли уже такая запись (например, по первичному ключу)
+                        // Предположим, что у нас есть столбец "id" как первичный ключ
+                        if (row.ContainsKey("id"))
                         {
-                            if (data.Columns.Contains(item.Key))
+                            var id = row["id"];
+                            DataRow existingRow = null;
+
+                            // Если у вас уже есть данные в DataTable, ищем совпадение
+                            if (data.Rows.Count > 0)
                             {
-                                newRow[item.Key] = item.Value ?? DBNull.Value;
+                                existingRow = data.Rows.Cast<DataRow>()
+                                    .FirstOrDefault(r => r["id"].Equals(id));
+                            }
+
+                            if (existingRow != null)
+                            {
+                                // Обновляем существующую запись
+                                foreach (var item in row)
+                                {
+                                    if (data.Columns.Contains(item.Key))
+                                    {
+                                        existingRow[item.Key] = item.Value ?? DBNull.Value;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // Добавляем новую запись
+                                var newRow = data.NewRow();
+                                foreach (var item in row)
+                                {
+                                    if (data.Columns.Contains(item.Key))
+                                    {
+                                        newRow[item.Key] = item.Value ?? DBNull.Value;
+                                    }
+                                }
+                                data.Rows.Add(newRow);
                             }
                         }
-                        data.Rows.Add(newRow);
+                        else
+                        {
+                            // Если нет первичного ключа, просто добавляем как новую запись
+                            var newRow = data.NewRow();
+                            foreach (var item in row)
+                            {
+                                if (data.Columns.Contains(item.Key))
+                                {
+                                    newRow[item.Key] = item.Value ?? DBNull.Value;
+                                }
+                            }
+                            data.Rows.Add(newRow);
+                        }
                     }
 
                     _databaseService.ConnectionStatus = "Данные импортированы";
